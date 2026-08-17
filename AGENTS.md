@@ -149,9 +149,10 @@ either is ambiguous, have them run it twice more.
 
 Say plainly:
 
-- It fires rarely. Measured across 639 real files: 0.6% of one person's own docs
-  and 5.8% of inherited repos are old enough to trigger it. That measurement
-  covers files on disk only.
+- It fires rarely. Measured across 613 real files: **1 file** of 150 in one
+  person's own docs, and **14 of 463** in inherited repos, were old enough to
+  trigger it. Quote the counts, not just the percentages — the first is a single
+  document. The measurement covers files on disk only.
 - It is a safety net for a quiet, consequential failure — a stale claim leaving
   in an artifact someone else acts on — not a daily assistant.
 - They can measure their own corpus from inside the installed directory:

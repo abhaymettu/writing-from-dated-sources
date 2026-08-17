@@ -70,26 +70,27 @@ present tense.
 
 ## Honest limits
 
-**It fires rarely.** Measured against 639 real files across two corpora:
+**It fires rarely.** Measured against 613 real files across two corpora:
 
 | Corpus | Files | Would trigger (>30d) |
 |---|---|---|
-| Author's own docs and agent memory | 176 | **1 file** (0.6%) |
-| Inherited and third-party repos | 463 | **27 files** (5.8%) |
+| Author's own docs and agent memory | 150 | **1 file** (0.7%) |
+| Inherited and third-party repos | 463 | **14 files** (3.0%) |
 
 The first row is a single document — the percentage is not hiding a population.
-Staleness is a property of the corpus, not the rule: roughly 10x higher on other
-people's repos. But anything under active use gets touched, and across both
-corpora almost nothing is older than two months. Treat this as a safety net that
-fires a few times a year, not a daily win.
+Staleness is a property of the corpus, not the rule: about 4.5x higher on other
+people's repos. But anything under active use gets touched. The oldest
+claim-bearing file in the inherited corpus is 45 days; in the author's own, one
+file at 113 days and nothing else past 30. Treat this as a safety net that fires
+a few times a year, not a daily win.
 
 **The threshold is not validated, only situated.** 30 days was a guess. Both
-corpora put the median claim-bearing doc at 10–14 days with a sharp thinning
-after 30, so the guess sits in a gap in the distribution rather than in the
-middle of the mass — at 14 days it would fire on 12–20% of all files. That is an
-argument that 30 is not obviously wrong. Nothing here measures a false-positive
-or false-negative rate at 30 versus 21 versus 45, so the number remains a guess
-with a plausible shape behind it.
+corpora put the median claim-bearing doc at 15 days, thinning sharply after 30,
+so the guess sits in a gap in the distribution rather than in the middle of the
+mass — at 14 days it would fire on ~8.7% of all files instead of 0.7-3.0%. That
+is an argument that 30 is not obviously wrong. Nothing here measures a
+false-positive or false-negative rate at 30 versus 21 versus 45, so the number
+remains a guess with a plausible shape behind it.
 
 **One case is entirely unmeasured.** Documents you *receive* — a pasted client
 doc, a forwarded email, an inherited handoff — never touch your filesystem, so
@@ -101,7 +102,12 @@ evidence that the skill earns its keep there, and it should not be read as one.
 
 ```bash
 find . -name '*.md' | python3 baserate.py
+BASERATE_TODAY=2026-08-16 find . -name '*.md' | python3 baserate.py   # reproduce a published run
 ```
+
+An earlier version of this script counted the word "were" as a present-tense
+claim, which inflated the published rates roughly twofold. The numbers above are
+post-fix. See [`TESTING.md`](TESTING.md).
 
 ## Staying quiet
 

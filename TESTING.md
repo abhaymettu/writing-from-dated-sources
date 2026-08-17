@@ -62,73 +62,54 @@ straight, and the nine-month case still flags. Verified again after the split.
 ## Base rate on a real corpus
 
 Every result above measures what happens *when* a stale source is involved.
-Nothing measured how often that actually occurs. Ran a detector over 176 real
-files — 68 agent memory files and ~108 project docs (READMEs, DECISIONS, NEXT,
-STATUS, PLAN, NOTES) across 53 repos — scoring each for a present-tense state
-claim and an effective date (explicit in-file date, else last git commit, else
-mtime).
+Nothing measured how often that actually occurs.
 
-    74 of 176 files (42%) make a present-tense state claim
-    median age of a claim-bearing doc: 14 days
-    90th percentile: 21 days      max: 113 days
+**A correction first.** The first version of `baserate.py` used a claim regex with
+an optional apostrophe — `\b(?:we|i)['’]?re\b` — which matched the plain word
+"were", ordinary past tense and the opposite of a present-state claim. It also
+used integer floor division for every percentage, so it could not reproduce its
+own headline figures. Both are fixed; `TODAY` is no longer a hardcoded constant
+either, which is an embarrassing bug for a staleness tool. Every number below is
+post-fix and roughly half what was first published. Reproduce with
+`BASERATE_TODAY=2026-08-16`.
 
-Threshold sensitivity, i.e. how many files the rule would fire on:
+Two corpora, 613 files. Corpus 1 is 68 agent memory files plus project docs
+(README, DECISIONS, NEXT, STATUS, PLAN, NOTES) across 53 repos, all written and
+maintained by this author. Corpus 2 is markdown from inherited and third-party
+repos — another person's working-notes repo, three plugin marketplaces, a
+vendored product repo, and team repos at work — where the effective date is the
+upstream commit date.
 
-    older than   7d:  50 files  (28.4%)
-    older than  14d:  36 files  (20.5%)
-    older than  30d:   1 file   ( 0.6%)
-    older than  90d:   1 file   ( 0.6%)
-    older than 180d:   0 files  ( 0.0%)
+| | Corpus 1 (own) | Corpus 2 (inherited) |
+|---|---|---|
+| files | 150 | 463 |
+| make a present-state claim | 25 (16.7%) | 76 (16.4%) |
+| median age of those | 15 days | 15 days |
+| oldest | 113 days | 45 days |
+| **would trigger (>30d)** | **1 (0.7%)** | **14 (3.0%)** |
+| would trigger (>14d) | 13 (8.7%) | 40 (8.6%) |
+| would trigger (>60d) | 1 (0.7%) | 0 (0%) |
 
-There is a cliff between 14 and 30 days and almost nothing beyond it. This
-author rewrites essentially every document within about three weeks, so on this
-corpus the rule as written is close to inert — and tuning the threshold down to
-catch anything would fire on a fifth to a quarter of all files, which is exactly
-the friction the silence threshold exists to prevent.
+Inherited repos run about **4.5x** higher, which confirms staleness is a corpus
+property rather than a property of the rule. But the cliff is present in both:
+past 60 days there is exactly one file in 613, and the inherited corpus tops out
+at 45 days. Anything under active use gets touched.
 
-**The base rate is a property of the corpus, not of the skill.** An inherited
-repo, a team wiki, or a client's status documents can be years stale. The same
-rule that is inert here could be load-bearing elsewhere.
+**The threshold is situated, not validated.** 30 days was a guess. Both corpora
+put the median claim-bearing doc at 15 days with sharp thinning after 30, so the
+guess sits in a gap rather than in the mass — at 14 days it would fire on ~8.7%
+of all files. That argues 30 is not obviously wrong. It does not measure a
+false-positive or false-negative rate at 30 versus 21 versus 45, and no such
+measurement exists here.
 
-**Blind spot in this measurement.** It only covers files on disk that this author
-writes and maintains. The failure mode is about sources you *receive* — a client
-doc pasted into chat, a forwarded email, an inherited handoff — which never
-appear in a filesystem scan. Those are plausibly staler than anything measured
-here, and the measurement cannot see them.
+**Honest read on value.** A low-frequency safety net, not a daily win. The team
+code repos contributed zero triggering files because they contain almost no prose
+docs at all.
 
-### Second corpus: repos this author did not write
-
-463 markdown files from inherited and third-party repos — another person's
-working-notes repo, three plugin marketplaces, a vendored product repo, and team
-repos at work — where the effective date is the upstream commit date.
-
-    23% make a present-tense state claim
-    older than  30d:  27 files (5.8%)
-    older than  60d:   2 files (0.4%)
-    older than  90d:   1 file  (0.2%)
-    older than 180d:   0 files
-
-Per repo, the files older than 30 days concentrate in two places: 16 in
-one person's working-notes repo and 11 in a plugin repo whose files are dated
-benchmark result files — documents that are *supposed* to describe a past date,
-where flagging is arguably correct rather than noise.
-
-The rate is roughly 8x higher than on this author's own files (5.8% vs 0.6%),
-which confirms staleness is a corpus property. But the cliff is still there,
-just moved: 27 files past 30 days, only 2 past 60. Across both corpora — 639
-real files — essentially nothing is older than two months. Anything under active
-use gets touched.
-
-**This validates the threshold by accident.** 30 days was a guess. Across both
-corpora the bulk of claim-bearing docs sits at a median of 10-14 days and the
-tail thins sharply after 30, so the guessed threshold happens to land in the
-valley between the two. Lowering it to 14 days would fire on 12-20% of files;
-raising it to 60 would fire on almost nothing.
-
-**Honest read on value.** This is a low-frequency safety net, not a daily win.
-The team code repos contributed zero triggering files because they contain almost
-no prose docs at all. The failure is real and the fix is correct, but on
-filesystem sources it will fire a few times a year, not a few times a week.
+**Blind spot.** This covers files on disk that someone writes or has checked out.
+The failure mode is about sources you *receive* — a client doc pasted into chat,
+a forwarded email, an inherited handoff — which never appear in a filesystem
+scan. Nothing here measures those, and their absence is not evidence either way.
 
 **What this implies for collecting data from other users.** The useful signal is
 not how often the skill fires. It is the age distribution of the sources people

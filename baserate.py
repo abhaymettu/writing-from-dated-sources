@@ -10,8 +10,11 @@ import re, subprocess, sys, os
 from datetime import date, datetime
 from pathlib import Path
 
-TODAY = date(2026, 8, 16)
-STALE_DAYS = 30
+# Today, not a frozen constant: a staleness tool that is itself stale is a joke.
+# Override for reproducing a published run: BASERATE_TODAY=2026-08-16
+TODAY = (datetime.strptime(os.environ["BASERATE_TODAY"], "%Y-%m-%d").date()
+         if os.environ.get("BASERATE_TODAY") else date.today())
+STALE_DAYS = int(os.environ.get("BASERATE_STALE_DAYS", "30"))
 
 CLAIM = re.compile(r"""(?ix)
     \b currently \b
@@ -19,8 +22,8 @@ CLAIM = re.compile(r"""(?ix)
   | \b at \s+ the \s+ moment \b
   | \b blocked \s+ on \b
   | \b in \s+ progress \b
-  | \b (?:we|i) ['’]? re \s
-  | \b (?:we|i) \s+ are \s
+  | \b (?:we|i) ['’] re \b
+  | \b (?:we|i) \s+ are \b
   | \b working \s+ on \b
   | \b as \s+ of \s+ now \b
   | \b still \s+ (?:needs|pending|blocked|open) \b
@@ -67,9 +70,7 @@ def effective_date(p: Path, text: str):
 
 
 def bucket(days):
-    if days <= 7:   return "0-7d"
-    if days <= 30:  return "8-30d"
-    if days <= 90:  return "31-90d"
+    if days <= 90:  return f"{STALE_DAYS+1}-90d"
     if days <= 365: return "91-365d"
     return "365d+"
 
@@ -93,16 +94,18 @@ def main(paths):
     with_claims = [r for r in rows if r[1] > 0]
     triggers = [r for r in with_claims if r[4] > STALE_DAYS]
 
+    pct = lambda k: 100.0 * k / total if total else 0.0
+    print(f"as of:                    {TODAY}")
     print(f"files scanned:            {total}")
-    print(f"make a present-state claim: {len(with_claims)}  ({100*len(with_claims)//max(total,1)}%)")
-    print(f"WOULD TRIGGER (claim + >{STALE_DAYS}d old): {len(triggers)}  ({100*len(triggers)//max(total,1)}%)")
+    print(f"make a present-state claim: {len(with_claims)}  ({pct(len(with_claims)):.1f}%)")
+    print(f"WOULD TRIGGER (claim + >{STALE_DAYS}d old): {len(triggers)}  ({pct(len(triggers)):.1f}%)")
     print()
 
     b = {}
     for r in triggers:
         b[bucket(r[4])] = b.get(bucket(r[4]), 0) + 1
     print("triggering files by age:")
-    for k in ["31-90d", "91-365d", "365d+"]:
+    for k in [f"{STALE_DAYS+1}-90d", "91-365d", "365d+"]:
         if k in b:
             print(f"  {k:>9}: {b[k]}")
     print()
