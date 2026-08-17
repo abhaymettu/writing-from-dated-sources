@@ -96,6 +96,40 @@ doc pasted into chat, a forwarded email, an inherited handoff — which never
 appear in a filesystem scan. Those are plausibly staler than anything measured
 here, and the measurement cannot see them.
 
+### Second corpus: repos this author did not write
+
+463 markdown files from inherited and third-party repos — another person's
+`career-ops`, three plugin marketplaces, a vendored product repo, and team
+repos at work — where the effective date is the upstream commit date.
+
+    23% make a present-tense state claim
+    older than  30d:  27 files (5.8%)
+    older than  60d:   2 files (0.4%)
+    older than  90d:   1 file  (0.2%)
+    older than 180d:   0 files
+
+Per repo, the files older than 30 days concentrate in two places: 16 in
+`career-ops` (someone else's working notes) and 11 in `ponytail`, which are dated
+benchmark result files — documents that are *supposed* to describe a past date,
+where flagging is arguably correct rather than noise.
+
+The rate is roughly 8x higher than on this author's own files (5.8% vs 0.6%),
+which confirms staleness is a corpus property. But the cliff is still there,
+just moved: 27 files past 30 days, only 2 past 60. Across both corpora — 639
+real files — essentially nothing is older than two months. Anything under active
+use gets touched.
+
+**This validates the threshold by accident.** 30 days was a guess. Across both
+corpora the bulk of claim-bearing docs sits at a median of 10-14 days and the
+tail thins sharply after 30, so the guessed threshold happens to land in the
+valley between the two. Lowering it to 14 days would fire on 12-20% of files;
+raising it to 60 would fire on almost nothing.
+
+**Honest read on value.** This is a low-frequency safety net, not a daily win.
+The team code repos contributed zero triggering files because they contain almost
+no prose docs at all. The failure is real and the fix is correct, but on
+filesystem sources it will fire a few times a year, not a few times a week.
+
 **What this implies for collecting data from other users.** The useful signal is
 not how often the skill fires. It is the age distribution of the sources people
 actually write from: a histogram of integers, no content, no paths. That single
