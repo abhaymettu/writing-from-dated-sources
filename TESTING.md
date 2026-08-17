@@ -59,6 +59,49 @@ not. Added one — days-old source whose subject moves in weeks or months means
 write normally and say nothing. Re-ran: 2/2 fresh-doc runs write the email
 straight, and the nine-month case still flags. Verified again after the split.
 
+## Base rate on a real corpus
+
+Every result above measures what happens *when* a stale source is involved.
+Nothing measured how often that actually occurs. Ran a detector over 176 real
+files — 68 agent memory files and ~108 project docs (READMEs, DECISIONS, NEXT,
+STATUS, PLAN, NOTES) across 53 repos — scoring each for a present-tense state
+claim and an effective date (explicit in-file date, else last git commit, else
+mtime).
+
+    74 of 176 files (42%) make a present-tense state claim
+    median age of a claim-bearing doc: 14 days
+    90th percentile: 21 days      max: 113 days
+
+Threshold sensitivity, i.e. how many files the rule would fire on:
+
+    older than   7d:  50 files  (28.4%)
+    older than  14d:  36 files  (20.5%)
+    older than  30d:   1 file   ( 0.6%)
+    older than  90d:   1 file   ( 0.6%)
+    older than 180d:   0 files  ( 0.0%)
+
+There is a cliff between 14 and 30 days and almost nothing beyond it. This
+author rewrites essentially every document within about three weeks, so on this
+corpus the rule as written is close to inert — and tuning the threshold down to
+catch anything would fire on a fifth to a quarter of all files, which is exactly
+the friction the silence threshold exists to prevent.
+
+**The base rate is a property of the corpus, not of the skill.** An inherited
+repo, a team wiki, or a client's status documents can be years stale. The same
+rule that is inert here could be load-bearing elsewhere.
+
+**Blind spot in this measurement.** It only covers files on disk that this author
+writes and maintains. The failure mode is about sources you *receive* — a client
+doc pasted into chat, a forwarded email, an inherited handoff — which never
+appear in a filesystem scan. Those are plausibly staler than anything measured
+here, and the measurement cannot see them.
+
+**What this implies for collecting data from other users.** The useful signal is
+not how often the skill fires. It is the age distribution of the sources people
+actually write from: a histogram of integers, no content, no paths. That single
+histogram is what decides the threshold, and it is the cheapest thing to collect
+that is worth collecting.
+
 ## Still open
 
 - The threshold is stated qualitatively ("only days old", "moves in weeks or
