@@ -3,6 +3,21 @@
 A Claude skill for one specific failure: **it copies a stale document's present
 tense into new prose.**
 
+## Install it by pasting this
+
+Give your agent this repo and it will set itself up, verify the install, and run
+a smoke test with you:
+
+```
+Set up https://github.com/abhaymettu/writing-from-dated-sources — follow its AGENTS.md
+```
+
+That works in Claude Code, Codex, Copilot CLI, or anything else that can read a
+URL and run a shell. It reads [`AGENTS.md`](AGENTS.md), which walks it through
+locating your skills directory, installing, verifying the frontmatter, and
+running a scenario that proves the skill actually fires. Manual install is at
+the bottom if you'd rather do it yourself.
+
 ```
 You:  Here's my project's STATUS.md, write me a short update email
       to the client.
@@ -89,7 +104,7 @@ The conflict rule in the sibling skill had a silence threshold; this one didn't.
 Added one: a days-old source whose subject moves in weeks or months gets written
 up normally, with nothing said about its age. Re-verified 2/2.
 
-## Install
+## Manual install
 
 ```bash
 git clone https://github.com/abhaymettu/writing-from-dated-sources \
