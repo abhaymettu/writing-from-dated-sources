@@ -99,7 +99,7 @@ here, and the measurement cannot see them.
 ### Second corpus: repos this author did not write
 
 463 markdown files from inherited and third-party repos — another person's
-`career-ops`, three plugin marketplaces, a vendored product repo, and team
+working-notes repo, three plugin marketplaces, a vendored product repo, and team
 repos at work — where the effective date is the upstream commit date.
 
     23% make a present-tense state claim
@@ -109,7 +109,7 @@ repos at work — where the effective date is the upstream commit date.
     older than 180d:   0 files
 
 Per repo, the files older than 30 days concentrate in two places: 16 in
-`career-ops` (someone else's working notes) and 11 in `ponytail`, which are dated
+one person's working-notes repo and 11 in a plugin repo whose files are dated
 benchmark result files — documents that are *supposed* to describe a past date,
 where flagging is arguably correct rather than noise.
 
