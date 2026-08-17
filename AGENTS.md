@@ -50,10 +50,14 @@ line, and do not assume it carries over.
 ```bash
 SKILLS_DIR=~/.claude/skills   # same value as Step 1
 set -u
+: "${SKILLS_DIR:?set SKILLS_DIR on the line above}"
 DEST="$SKILLS_DIR/writing-from-dated-sources"
-case "$DEST" in /|/*/) echo "REFUSING: bad destination $DEST"; exit 1;; esac
 if [ -d "$DEST/.git" ]; then
-  git -C "$DEST" fetch --depth 1 origin main && git -C "$DEST" reset --hard origin/main
+  if [ -n "$(git -C "$DEST" status --porcelain)" ]; then
+    echo "LOCAL EDITS PRESENT — stop and ask before updating"
+  else
+    git -C "$DEST" fetch --depth 1 origin main && git -C "$DEST" reset --hard origin/main
+  fi
 elif [ -e "$DEST" ]; then
   echo "EXISTS BUT NOT A GIT REPO — stop and ask"
 else
@@ -63,6 +67,9 @@ fi
 
 (`fetch` + `reset` rather than `pull`, because `--depth 1` clones are shallow and
 `pull --ff-only` is unreliable against them.)
+
+If it printed `LOCAL EDITS PRESENT`, someone has customised this copy — the
+update would overwrite their changes. Stop and ask; do not force it.
 
 If it printed `EXISTS BUT NOT A GIT REPO`, stop and ask. Do not delete it.
 
