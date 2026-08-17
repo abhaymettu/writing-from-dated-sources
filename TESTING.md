@@ -83,12 +83,16 @@ upstream commit date.
 | | Corpus 1 (own) | Corpus 2 (inherited) |
 |---|---|---|
 | files | 150 | 463 |
-| make a present-state claim | 25 (16.7%) | 76 (16.4%) |
+| make a present-state claim | 26 (17.3%) | 76 (16.4%) |
 | median age of those | 15 days | 15 days |
 | oldest | 113 days | 45 days |
 | **would trigger (>30d)** | **1 (0.7%)** | **14 (3.0%)** |
 | would trigger (>14d) | 13 (8.7%) | 40 (8.6%) |
 | would trigger (>60d) | 1 (0.7%) | 0 (0%) |
+
+One corpus-1 file carries a future date in its content and is excluded from the
+age statistics but counted as claim-bearing; that is the difference between 26
+and the 25 used for the median.
 
 Inherited repos run about **4.5x** higher, which confirms staleness is a corpus
 property rather than a property of the rule. But the cliff is present in both:
