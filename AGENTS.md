@@ -25,12 +25,16 @@ Step 5; note its absence but continue without it.
 
 Pick by the runtime **you are currently running in**, not by what exists on disk:
 
-| You are | Use |
-|---|---|
-| Claude Code | `~/.claude/skills` |
-| Codex, Copilot CLI, Gemini CLI, anything else | `~/.agents/skills` |
+| You are | Use | Discovery |
+|---|---|---|
+| Claude Code | `~/.claude/skills` | verified |
+| Codex, Copilot CLI, Gemini CLI, anything else | `~/.agents/skills` | **untested — see Step 3** |
 
 If you cannot tell which runtime you are, ask the person. Do not guess.
+
+`~/.agents/skills` is a cross-runtime convention. Nothing in this repo has been
+tested on those runtimes. If that is your row, say so to the person before you
+install, not after.
 
 ```bash
 SKILLS_DIR=~/.claude/skills   # or ~/.agents/skills — pick from the table above
