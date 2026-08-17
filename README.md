@@ -23,7 +23,7 @@ You:  Here's my project's STATUS.md, write me a short update email
       to the client.
 
       # Status — Payments Migration
-      Last updated: 2025-11-20
+      Last updated: 2025-11-20        # ~9 months before "today"
       Current phase: integration testing
       Blocked on: Stripe sandbox credentials from client's finance team
 
@@ -60,6 +60,10 @@ unprompted and with the right month counts.
 
 Fourteen of sixteen scenarios passed with no skill at all. The two that failed
 were the only two that asked for **generation** rather than **evaluation**.
+
+n is small throughout and the runs were author-graded. [`TESTING.md`](TESTING.md)
+gives the counts, the isolation method, and a methodology error that produced a
+wrong conclusion partway through.
 
 Rewriting a document carries its voice along with its content, and the voice is
 present tense.
