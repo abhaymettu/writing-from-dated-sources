@@ -13,7 +13,13 @@ alternative install location.
 git --version && git ls-remote --exit-code https://github.com/abhaymettu/writing-from-dated-sources >/dev/null && echo OK
 ```
 
-No `OK` means git is missing or the network is blocked. Stop and say which.
+```bash
+python3 --version
+```
+
+No `OK` from the first means git is missing or the network is blocked — stop and
+say which. `python3` is only needed for the optional corpus measurement in
+Step 5; note its absence but continue without it.
 
 ## Step 1 — Set the skills directory
 
@@ -27,21 +33,27 @@ Pick by the runtime **you are currently running in**, not by what exists on disk
 If you cannot tell which runtime you are, ask the person. Do not guess.
 
 ```bash
-SKILLS_DIR=~/.claude/skills     # or ~/.agents/skills — set this to your row above
+SKILLS_DIR=~/.claude/skills   # or ~/.agents/skills — pick from the table above
 mkdir -p "$SKILLS_DIR" && echo "installing into $SKILLS_DIR"
 ```
 
-Use `"$SKILLS_DIR"` in every later command. It is a shell variable, not a
-placeholder to paste literally.
+**Every command block below re-declares `SKILLS_DIR` on its own first line.** That
+is deliberate: shell state does not survive between tool calls, and an unset
+`SKILLS_DIR` would turn the install and uninstall commands into operations on `/`.
+Edit the value in each block to match what you chose here. Do not delete the
+line, and do not assume it carries over.
 
 **Tell them:** which directory you chose and why.
 
 ## Step 2 — Install
 
 ```bash
+SKILLS_DIR=~/.claude/skills   # same value as Step 1
+set -u
 DEST="$SKILLS_DIR/writing-from-dated-sources"
+case "$DEST" in /|/*/) echo "REFUSING: bad destination $DEST"; exit 1;; esac
 if [ -d "$DEST/.git" ]; then
-  git -C "$DEST" pull --ff-only
+  git -C "$DEST" fetch --depth 1 origin main && git -C "$DEST" reset --hard origin/main
 elif [ -e "$DEST" ]; then
   echo "EXISTS BUT NOT A GIT REPO — stop and ask"
 else
@@ -49,11 +61,15 @@ else
 fi
 ```
 
+(`fetch` + `reset` rather than `pull`, because `--depth 1` clones are shallow and
+`pull --ff-only` is unreliable against them.)
+
 If it printed `EXISTS BUT NOT A GIT REPO`, stop and ask. Do not delete it.
 
 **Verify:**
 
 ```bash
+SKILLS_DIR=~/.claude/skills   # same value as Step 1
 head -4 "$SKILLS_DIR/writing-from-dated-sources/SKILL.md"
 ```
 
@@ -61,8 +77,14 @@ Must show YAML frontmatter containing `name: writing-from-dated-sources`.
 
 ## Step 3 — Confirm discovery
 
-Skills are read at session start, so this one is not active in the session you
-are in right now. Do not claim otherwise.
+In Claude Code, skills are read at session start, so this one is not active in
+the session you are in right now — do not claim otherwise.
+
+**Only Claude Code is verified.** `~/.agents/skills` is a convention other
+runtimes may read, but nothing here has been tested on Codex, Copilot CLI, or
+Gemini CLI, and how they load skills is their business, not this repo's. If you
+are on one of those, tell the person plainly that discovery is unverified and
+point them at their runtime's own docs before running any check.
 
 **Tell them:** "Installed. Start a new session, then paste the two checks in
 Step 4."
@@ -95,6 +117,11 @@ blocker was…") rather than asserted in the present tense.
 it came from. A caveat addressed to the *user* but missing from the email body is
 also a fail — the email is the thing that gets sent.
 
+**Partial** (the most likely real outcome): the subject or opening names the
+date, but the body still asserts "we're blocked on…" in the present tense. Count
+that as a fail of the attribution half and say so specifically — it is the more
+useful bug report.
+
 ### 4b — should stay silent
 
 Same prompt, with the date set to **two days ago**.
@@ -104,8 +131,12 @@ Same prompt, with the date set to **two days ago**.
 **Fail:** it opens by announcing the doc is two days old. That is the specific
 leak this skill was tuned to avoid; please report it as an issue on the repo.
 
-Tell them both results. As with any language-model check, this is a sample and
-not a deterministic test — if either is ambiguous, run it twice more.
+These run in a session you cannot see. Ask them to paste both replies back to
+you, then judge against the criteria above and tell them the verdict. Do not
+report a result you have not been shown.
+
+As with any language-model check this is a sample, not a deterministic test — if
+either is ambiguous, have them run it twice more.
 
 ## Step 5 — Tell them what they actually got
 
@@ -119,8 +150,12 @@ Say plainly:
 - They can measure their own corpus from inside the installed directory:
 
   ```bash
-  find ~/some/project -name '*.md' | python3 "$SKILLS_DIR/writing-from-dated-sources/baserate.py"
+  find ~/some/project -name '*.md' \
+    | python3 ~/.claude/skills/writing-from-dated-sources/baserate.py
   ```
+
+  (Written out in full, since they will run this in their own shell where
+  `SKILLS_DIR` was never set. Adjust the path if you installed elsewhere.)
 
 - The supporting evidence is small-n and author-run. `TESTING.md` gives the
   counts and the limits; point them there rather than overstating it.
@@ -130,14 +165,14 @@ Say plainly:
 A companion covers a related failure: a date the person asserts conflicting with
 the date already in your context, such as a "today is…" pasted from an old email.
 
-Ask whether they want it. If yes, repeat Steps 1–4 using
-`https://github.com/abhaymettu/temporal-grounding`; its own `AGENTS.md` carries
-the matching smoke test.
+Ask whether they want it. If yes, follow that repo's own AGENTS.md — do not reuse the commands here, they hardcode this repo's URL and directory name:
+`https://github.com/abhaymettu/temporal-grounding`.
 
 ## Uninstall
 
 ```bash
-rm -rf "$SKILLS_DIR/writing-from-dated-sources"
+SKILLS_DIR=~/.claude/skills   # same value as Step 1
+rm -rf "${SKILLS_DIR:?set SKILLS_DIR first}/writing-from-dated-sources"
 ```
 
 Nothing else is written anywhere: no hooks, no settings changes, no network calls

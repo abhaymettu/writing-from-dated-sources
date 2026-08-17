@@ -12,8 +12,8 @@ a smoke test with you:
 Set up https://github.com/abhaymettu/writing-from-dated-sources — follow its AGENTS.md
 ```
 
-That works in Claude Code, Codex, Copilot CLI, or anything else that can read a
-URL and run a shell. It reads [`AGENTS.md`](AGENTS.md), which walks it through
+Verified on Claude Code. `AGENTS.md` also covers the `~/.agents/skills`
+convention other runtimes may read, but skill discovery there is untested. It reads [`AGENTS.md`](AGENTS.md), which walks it through
 locating your skills directory, installing, verifying the frontmatter, and
 running a scenario that proves the skill actually fires. Manual install is at
 the bottom if you'd rather do it yourself.
@@ -74,23 +74,28 @@ present tense.
 
 | Corpus | Files | Would trigger (>30d) |
 |---|---|---|
-| Author's own docs and agent memory | 176 | 0.6% |
-| Inherited and third-party repos | 463 | 5.8% |
+| Author's own docs and agent memory | 176 | **1 file** (0.6%) |
+| Inherited and third-party repos | 463 | **27 files** (5.8%) |
 
-Staleness is a property of the corpus, not the rule — 8x higher on other
+The first row is a single document — the percentage is not hiding a population.
+Staleness is a property of the corpus, not the rule: roughly 10x higher on other
 people's repos. But anything under active use gets touched, and across both
 corpora almost nothing is older than two months. Treat this as a safety net that
 fires a few times a year, not a daily win.
 
-**The threshold survived contact with data.** 30 days was a guess. Both corpora
-put the median claim-bearing doc at 10–14 days with a sharp thinning after 30, so
-the guess landed in the valley. At 14 days it would fire on 12–20% of all files,
-which is noise.
+**The threshold is not validated, only situated.** 30 days was a guess. Both
+corpora put the median claim-bearing doc at 10–14 days with a sharp thinning
+after 30, so the guess sits in a gap in the distribution rather than in the
+middle of the mass — at 14 days it would fire on 12–20% of all files. That is an
+argument that 30 is not obviously wrong. Nothing here measures a false-positive
+or false-negative rate at 30 versus 21 versus 45, so the number remains a guess
+with a plausible shape behind it.
 
-**The case it's really for can't be measured this way.** Documents you *receive* —
-a pasted client doc, a forwarded email, an inherited handoff — never touch your
-filesystem. That's where staleness is worst and where this most likely earns its
-keep.
+**One case is entirely unmeasured.** Documents you *receive* — a pasted client
+doc, a forwarded email, an inherited handoff — never touch your filesystem, so
+nothing above covers them. They may well be staler than anything measured here.
+That is a reason the numbers are a floor rather than the whole picture; it is not
+evidence that the skill earns its keep there, and it should not be read as one.
 
 [`baserate.py`](baserate.py) reruns the measurement on any corpus:
 
@@ -106,7 +111,8 @@ the email — correct, useless, and pure added friction on the common case.
 
 The conflict rule in the sibling skill had a silence threshold; this one didn't.
 Added one: a days-old source whose subject moves in weeks or months gets written
-up normally, with nothing said about its age. Re-verified 2/2.
+up normally, with nothing said about its age. Two runs after the fix behaved
+correctly — enough to show the change took, not enough to call it verified.
 
 ## Manual install
 
@@ -125,8 +131,9 @@ the GREEN runs, the leak control that forced the threshold, and the base-rate
 measurements.
 
 Built with the TDD-for-skills approach from
-[obra/superpowers](https://github.com/obra/superpowers): no guidance ships
-without a failing test behind it.
+[obra/superpowers](https://github.com/obra/superpowers): every rule here has a
+scenario behind it that failed before the rule existed. Those scenarios are 2 of
+16, author-written and author-graded.
 
 ## Related
 
